@@ -18,6 +18,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- 載入診所資料 -->
+    <script src="clinic_data.js"></script>
+
     <style>
         body {
             background-color: #f3f4f6;
@@ -76,25 +79,11 @@
             const [selectedDistrict, setSelectedDistrict] = useState("全部");
             const [selectedDept, setSelectedDept] = useState("全部");
             
-            // 讀取 JSON 資料
+            // 直接使用從 clinic_data.js 載入的資料
             useEffect(() => {
-                setIsLoading(true);
-                fetch('clinic_data.json')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('無法讀取資料檔案 (clinic_data.json)');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        setClinicData(data);
-                        setIsLoading(false);
-                    })
-                    .catch(err => {
-                        console.error("Error loading data:", err);
-                        setError("讀取資料失敗，請確認 'clinic_data.json' 檔案存在且未被瀏覽器安全性阻擋 (CORS)。建議使用 Live Server 開啟。");
-                        setIsLoading(false);
-                    });
+                // window.clinicData 是從 clinic_data.js 來的全域變數
+                setClinicData(window.clinicData || []);
+                setIsLoading(false);
             }, []);
 
             // 初始化 Lucide icons
