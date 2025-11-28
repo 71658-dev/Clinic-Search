@@ -1,4 +1,4 @@
-const clinicData = [
+window.clinicData = [
   {
     "name": "博暘牙醫診所",
     "code": "3712040593",
