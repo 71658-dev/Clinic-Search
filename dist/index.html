@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新竹市診所快速查詢系統</title>
-    
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -12,7 +12,6 @@
     <script src="/clinic_data.js"></script>
 
     <!-- Entry point for Vite -->
-    <script type="module" src="/src/app.jsx"></script>
 
     <style>
         body {
@@ -34,7 +33,7 @@
         .tag-scroll::-webkit-scrollbar {
             display: none; /* Chrome/Safari/Webkit */
         }
-        
+
         /* 篩選器群組樣式 */
         .filter-group-label {
             font-size: 0.75rem;
@@ -43,6 +42,8 @@
             font-weight: 500;
         }
     </style>
+  <script type="module" crossorigin src="/app.js"></script>
+  <link rel="stylesheet" crossorigin href="/output.css">
 </head>
 <body>
     <div id="root"></div>
