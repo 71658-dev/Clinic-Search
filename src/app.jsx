@@ -1,0 +1,356 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+
+// 圖標組件
+const Icons = {
+    Search: () => <i data-lucide="search" className="w-5 h-5"></i>,
+    MapPin: () => <i data-lucide="map-pin" className="w-4 h-4"></i>,
+    Phone: () => <i data-lucide="phone" className="w-4 h-4"></i>,
+    Building: () => <i data-lucide="building-2" className="w-4 h-4"></i>,
+    User: () => <i data-lucide="user" className="w-4 h-4"></i>,
+    Hash: () => <i data-lucide="hash" className="w-4 h-4"></i>,
+    Stethoscope: () => <i data-lucide="stethoscope" className="w-4 h-4"></i>,
+    Filter: () => <i data-lucide="filter" className="w-4 h-4"></i>,
+    AlertCircle: () => <i data-lucide="alert-circle" className="w-5 h-5"></i>
+};
+
+const App = () => {
+    const [clinicData, setClinicData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedDistrict, setSelectedDistrict] = useState("全部");
+    const [selectedDept, setSelectedDept] = useState("全部");
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // 直接使用從 clinic_data.js 載入的資料
+    useEffect(() => {
+        // window.clinicData 是從 clinic_data.js 來的全域變數
+        setClinicData(window.clinicData || []);
+        setIsLoading(false);
+    }, []);
+
+    // 當篩選條件改變時，重設回第一頁
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedDistrict, selectedDept]);
+
+    // 當篩選或換頁時，滑動到頁面頂部
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage, selectedDistrict, selectedDept]);
+
+    // 初始化 Lucide icons
+    useEffect(() => {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }, [searchTerm, selectedDistrict, selectedDept, clinicData, isLoading]);
+
+    // 1. 動態獲取所有的行政區
+    const districts = useMemo(() => {
+        const allDistricts = clinicData.map(item => item.district).filter(Boolean);
+        return ["全部", ...new Set(allDistricts)];
+    }, [clinicData]);
+
+    // 2. 動態獲取所有的科別
+    const allDepartments = useMemo(() => {
+        const depts = new Set();
+        clinicData.forEach(item => {
+            if (item.departments && Array.isArray(item.departments)) {
+                item.departments.forEach(d => depts.add(d));
+            }
+        });
+        return ["全部", ...Array.from(depts).sort()];
+    }, [clinicData]);
+
+    // 3. 過濾邏輯
+    const filteredData = useMemo(() => {
+        return clinicData.filter(item => {
+            // 區域過濾
+            const matchDistrict = selectedDistrict === "全部" || item.district === selectedDistrict;
+
+            // 科別過濾
+            const matchDept = selectedDept === "全部" || (item.departments && item.departments.includes(selectedDept));
+
+            // 關鍵字過濾 (名稱、地址、代碼、科別)
+            const normalizedSearch = searchTerm.toLowerCase().trim();
+            const departmentsStr = item.departments ? item.departments.join(" ") : "";
+
+            const matchKeyword =
+                (item.name || "").toLowerCase().includes(normalizedSearch) ||
+                (item.address || "").toLowerCase().includes(normalizedSearch) ||
+                (item.code || "").includes(normalizedSearch) ||
+                departmentsStr.toLowerCase().includes(normalizedSearch);
+
+            return matchDistrict && matchDept && matchKeyword;
+        });
+    }, [searchTerm, selectedDistrict, selectedDept, clinicData]);
+
+    // 4. 分頁邏輯
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+    // 清除篩選
+    const clearFilters = () => {
+        setSearchTerm("");
+        setSelectedDistrict("全部");
+        setSelectedDept("全部");
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-500">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
+                <p>資料載入中...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full border border-red-100">
+                    <div className="flex items-center gap-3 text-red-600 mb-4">
+                        <Icons.AlertCircle />
+                        <h2 className="text-xl font-bold">資料讀取錯誤</h2>
+                    </div>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <div className="bg-gray-100 p-4 rounded text-sm text-gray-500">
+                        <strong>提示：</strong> 如果您是直接雙擊打開 HTML 檔案，瀏覽器會因為安全性限制 (CORS) 阻止讀取外部 JSON 檔案。請嘗試將檔案放在網頁伺服器上，或使用 VS Code 的 Live Server 套件預覽。
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen pb-10">
+            {/* Header */}
+            <div className="bg-teal-700 text-white shadow-lg top-0 z-20">
+                <div className="max-w-4xl mx-auto px-4 py-4">
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        <Icons.Building />
+                        新竹市診所查詢系統
+                    </h1>
+                    <p className="text-teal-100 text-sm mt-1">
+                        查詢醫療機構名稱、地址、科別與權屬
+                    </p>
+                </div>
+
+                {/* Search & Filter Area */}
+                <div className="max-w-4xl mx-auto px-4 pb-4">
+                    {/* Search Input */}
+                    <div className="relative mb-4">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <Icons.Search />
+                        </div>
+                        <input
+                            type="text"
+                            className="block w-full pl-10 pr-3 py-3 border-none rounded-lg leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-300 shadow-md"
+                            placeholder="輸入診所名稱、地址、科別或代碼..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Filters Container */}
+                    <div className="space-y-3">
+                        {/* District Filter */}
+                        <div>
+                            <div className="filter-group-label flex items-center gap-1">
+                                <Icons.MapPin /> 行政區
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {districts.map(dist => (
+                                    <button
+                                        key={dist}
+                                        onClick={() => setSelectedDistrict(prev => prev === dist ? "全部" : dist)}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-200 border ${
+                                            selectedDistrict === dist
+                                                ? 'bg-white text-teal-800 border-white shadow-sm'
+                                                : 'bg-teal-800 text-teal-100 border-teal-600 hover:bg-teal-600'
+                                        }`}
+                                    >
+                                        {dist}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Department Filter */}
+                        <div>
+                            <div className="filter-group-label flex items-center gap-1">
+                                <Icons.Stethoscope /> 設置科別
+                            </div>
+                            <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto tag-scroll pr-2">
+                                {allDepartments.map(dept => (
+                                    <button
+                                        key={dept}
+                                        onClick={() => setSelectedDept(prev => prev === dept ? "全部" : dept)}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-200 border ${
+                                            selectedDept === dept
+                                                ? 'bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm'
+                                                : 'bg-teal-800/50 text-teal-50 border-teal-600/50 hover:bg-teal-600'
+                                        }`}
+                                    >
+                                        {dept}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="max-w-4xl mx-auto px-4 mt-6">
+                {/* Summary Bar */}
+                <div className="flex flex-wrap justify-between items-center mb-4 text-gray-600 text-sm gap-2">
+                    <span>
+                        搜尋結果：<span className="font-bold text-teal-700">{filteredData.length}</span> 筆
+                    </span>
+
+                    <div className="flex gap-2">
+                        {selectedDistrict !== "全部" && (
+                            <span className="bg-gray-200 px-2 py-1 rounded text-xs text-gray-700">
+                                區域：{selectedDistrict}
+                            </span>
+                        )}
+                        {selectedDept !== "全部" && (
+                            <span className="bg-yellow-100 px-2 py-1 rounded text-xs text-yellow-800">
+                                科別：{selectedDept}
+                            </span>
+                        )}
+                        {(selectedDistrict !== "全部" || selectedDept !== "全部" || searchTerm) && (
+                            <button
+                                onClick={clearFilters}
+                                className="text-teal-600 hover:text-teal-800 text-xs font-medium underline ml-2"
+                            >
+                                清除所有條件
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Grid List */}
+                {filteredData.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[500px]">
+                        {currentItems.map((item, idx) => (
+                            <div key={item.code + idx} className="clinic-card bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+                                <div className="flex justify-between items-start mb-1">
+                                    <h3 className="text-lg font-bold text-gray-800 leading-tight">
+                                        {item.name}
+                                    </h3>
+                                </div>
+
+                                {/* 權屬別與區域 Badges */}
+                                <div className="mb-3 flex flex-wrap gap-1">
+                                     {item.ownership && (
+                                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                            {item.ownership}
+                                        </span>
+                                     )}
+                                    {item.district && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                            {item.district}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2 mt-1 flex-grow">
+                                    <div className="flex items-start gap-2 text-gray-600 text-sm">
+                                        <span className="mt-0.5 text-gray-400 shrink-0"><Icons.MapPin /></span>
+                                        <a
+                                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("新竹市" + item.address)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-teal-600 hover:underline leading-snug"
+                                        >
+                                            {item.address}
+                                        </a>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-gray-600 text-sm">
+                                        <span className="text-gray-400 shrink-0"><Icons.User /></span>
+                                        <span>負責人：{item.contact}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-gray-600 text-sm">
+                                        <span className="text-gray-400 shrink-0"><Icons.Hash /></span>
+                                        <span className="font-mono text-gray-500 text-xs">機構代碼：{item.code}</span>
+                                    </div>
+
+                                    {/* 科別列表 */}
+                                    {item.departments && item.departments.length > 0 && (
+                                        <div className="pt-2 border-t border-gray-50 mt-2">
+                                            <div className="flex items-center gap-1 text-gray-500 text-xs mb-1.5">
+                                                <Icons.Stethoscope />
+                                                <span>設置科別</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1 tag-scroll max-h-20 overflow-y-auto">
+                                                {item.departments.map((dept, i) => (
+                                                    <span key={i} className="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded border border-teal-100 hover:bg-teal-100 transition-colors">
+                                                        {dept}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                                    <span className="text-gray-500 font-mono text-sm tracking-wide">
+                                        {item.phone}
+                                    </span>
+                                    <a
+                                        href={`tel:${item.phone.replace(/[\s-\(\)]/g, '')}`}
+                                        className="flex items-center gap-1.5 bg-teal-600 text-white hover:bg-teal-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                                    >
+                                        <Icons.Phone />
+                                        撥打電話
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+                        <div className="mx-auto w-12 h-12 text-gray-300 mb-3">
+                            <Icons.Search />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900">找不到符合的診所</h3>
+                        <p className="text-gray-500 mt-1">請嘗試使用不同的關鍵字或切換區域、科別</p>
+                        <button
+                            onClick={clearFilters}
+                            className="mt-4 text-teal-600 hover:text-teal-800 font-medium"
+                        >
+                            清除所有篩選條件
+                        </button>
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-4 mt-8 text-sm">
+                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">上一頁</button>
+                        <span className="text-gray-600">第 {currentPage} / {totalPages} 頁</span>
+                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">下一頁</button>
+                    </div>
+                )}
+            </div>
+
+            <footer className="mt-12 text-center text-gray-400 text-xs pb-6">
+                <p>© 2025 新竹市診所查詢系統 | 資料來源：JSON 資料檔</p>
+            </footer>
+        </div>
+    );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
