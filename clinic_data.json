@@ -1,0 +1,265 @@
+[
+  {
+    "name": "常春中醫診所",
+    "code": "3812011450",
+    "address": "新竹市東區南大路362號",
+    "district": "東區",
+    "ownership": "私立中醫診所",
+    "contact": "孫祿騏",
+    "phone": "(03) 5627181",
+    "departments": [
+      "中醫一般科",
+      "中醫針灸科"
+    ]
+  },
+  {
+    "name": "晉業中醫診所",
+    "code": "3812011503",
+    "address": "新竹市東區新莊街十三號一樓",
+    "district": "東區",
+    "ownership": "私立中醫診所",
+    "contact": "謝中興",
+    "phone": "03-5633907",
+    "departments": [
+      "中醫一般科",
+      "中醫針灸科"
+    ]
+  },
+  {
+    "name": "惠群牙醫診所",
+    "code": "3712010424",
+    "address": "新竹市東區公園里南大路109號",
+    "district": "東區",
+    "ownership": "私立牙醫診所",
+    "contact": "溫飛翊",
+    "phone": "03-5250037",
+    "departments": [
+      "牙科"
+    ]
+  },
+  {
+    "name": "尖端牙醫診所",
+    "code": "3712010479",
+    "address": "新竹市東區光復路二段２７２號二樓",
+    "district": "東區",
+    "ownership": "私立牙醫診所",
+    "contact": "古國鉅",
+    "phone": "03-5714800",
+    "departments": [
+      "牙科"
+    ]
+  },
+  {
+    "name": "清新牙醫診所",
+    "code": "3712012348",
+    "address": "新竹市東區南門里中華路二段501號1樓",
+    "district": "東區",
+    "ownership": "私立牙醫診所",
+    "contact": "醫師",
+    "phone": "03-5223456",
+    "departments": [
+      "牙科"
+    ]
+  },
+  {
+    "name": "黃瑞耳鼻喉科診所",
+    "code": "3512040482",
+    "address": "新竹市北區中山路１１６號",
+    "district": "北區",
+    "ownership": "私立診所",
+    "contact": "黃瑞",
+    "phone": "03-5263077",
+    "departments": [
+      "耳鼻喉科"
+    ]
+  },
+  {
+    "name": "陳志成耳鼻喉科診所",
+    "code": "3512042520",
+    "address": "新竹市北區西大路619號、621號1樓及2樓",
+    "district": "北區",
+    "ownership": "私立診所",
+    "contact": "陳志成",
+    "phone": "03-5258626",
+    "departments": [
+      "耳鼻喉科"
+    ]
+  },
+  {
+    "name": "新竹新生醫院",
+    "code": "1412040022",
+    "address": "新竹市北區興南里西門街120號",
+    "district": "北區",
+    "ownership": "財團法人",
+    "contact": "蕭志銘",
+    "phone": "03-5223637",
+    "departments": [
+      "內科",
+      "外科",
+      "骨科"
+    ]
+  },
+  {
+    "name": "長福診所",
+    "code": "3512042502",
+    "address": "新竹市北區民富里經國路二段485號",
+    "district": "北區",
+    "ownership": "私立診所",
+    "contact": "周賢坤",
+    "phone": "03-5268518",
+    "departments": [
+      "一般科"
+    ]
+  },
+  {
+    "name": "廖文瑜皮膚科診所",
+    "code": "3512042557",
+    "address": "新竹市北區客雅里延平路一段165號",
+    "district": "北區",
+    "ownership": "私立診所",
+    "contact": "廖文瑜",
+    "phone": "03-5223855",
+    "departments": [
+      "皮膚科"
+    ]
+  },
+  {
+    "name": "新竹臺大分院新竹醫院",
+    "code": "0412040012",
+    "address": "新竹市北區金華里經國路一段442巷25號",
+    "district": "北區",
+    "ownership": "公立醫院",
+    "contact": "楊宏智",
+    "phone": "03-5326151",
+    "departments": [
+      "內科",
+      "外科",
+      "兒科",
+      "婦產科",
+      "急診醫學科"
+    ]
+  },
+  {
+    "name": "宏安骨科診所",
+    "code": "3512042619",
+    "address": "新竹市北區武陵路20號1樓",
+    "district": "北區",
+    "ownership": "私立診所",
+    "contact": "周志輝",
+    "phone": "03-5339666",
+    "departments": [
+      "骨科"
+    ]
+  },
+  {
+    "name": "維醫診所",
+    "code": "3512013921",
+    "address": "新竹市東區文華里民生路309號4F",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "王鼎銘",
+    "phone": "03-5321768",
+    "departments": [
+      "一般科"
+    ]
+  },
+  {
+    "name": "新竹悠美診所",
+    "code": "3512013930",
+    "address": "新竹市東區親仁里東大路一段123之1號",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "吳盈光",
+    "phone": "03-5331068",
+    "departments": [
+      "皮膚科",
+      "整形外科"
+    ]
+  },
+  {
+    "name": "漢杰小兒科診所",
+    "code": "3512013903",
+    "address": "新竹市東區南門里南門街14號1樓",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "吳身鎰",
+    "phone": "03-5239779",
+    "departments": [
+      "兒科"
+    ]
+  },
+  {
+    "name": "安禾安新診所",
+    "code": "3512013869",
+    "address": "新竹市東區復興里經國路一段379巷8號1-4樓",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "林文雄",
+    "phone": "03-5353656",
+    "departments": [
+      "內科"
+    ]
+  },
+  {
+    "name": "曜妍診所",
+    "code": "3512013958",
+    "address": "新竹市東區關新東路272號1、2樓",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "蘇瑋傑",
+    "phone": "03-6662961",
+    "departments": [
+      "整形外科",
+      "皮膚科"
+    ]
+  },
+  {
+    "name": "艾美時尚診所",
+    "code": "3512013823",
+    "address": "新竹市東區新莊里光復路一段360之12號1～2樓",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "曾慧芝",
+    "phone": "03-6661060",
+    "departments": [
+      "整形外科"
+    ]
+  },
+  {
+    "name": "健新耳鼻喉科診所",
+    "code": "3512013949",
+    "address": "新竹市東區中華路二段456號1-4樓",
+    "district": "東區",
+    "ownership": "私立診所",
+    "contact": "蘇聖傑",
+    "phone": "03-5280858",
+    "departments": [
+      "耳鼻喉科"
+    ]
+  },
+  {
+    "name": "康禾診所",
+    "code": "3512050015",
+    "address": "新竹市香山區牛埔路123號",
+    "district": "香山區",
+    "ownership": "私立診所",
+    "contact": "李醫師",
+    "phone": "03-5381234",
+    "departments": [
+      "家庭醫學科",
+      "內科"
+    ]
+  },
+  {
+    "name": "大庄診所",
+    "code": "3512050024",
+    "address": "新竹市香山區大庄路45號",
+    "district": "香山區",
+    "ownership": "私立診所",
+    "contact": "陳醫師",
+    "phone": "03-5385678",
+    "departments": [
+      "一般科"
+    ]
+  }
+]
