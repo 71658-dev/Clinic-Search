@@ -1,50 +1,560 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新竹市診所快速查詢系統</title>
+    <title>新竹診所查詢系統 (深色版)</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Lucide Icons -->
-    <script src="./lucide.min.js"></script>
-
-    <!-- 載入診所資料 -->
-    <script src="./clinic_data.js"></script>
-
-    <!-- Entry point for Vite -->
-    <script type="module" src="./dist/app.js"></script>
-
     <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --bg-element: #2c2c2c;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border-color: #333;
+            --accent-active: #ffffff;
+            --accent-text: #000000;
+        }
+
         body {
-            background-color: #f3f4f6;
-            font-family: "Noto Sans TC", system-ui, -apple-system, sans-serif;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding-bottom: 80px;
         }
-        .clinic-card {
-            transition: all 0.2s ease-in-out;
+
+        /* --- Hero Search Area --- */
+        .hero-section {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        .clinic-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+        .search-container {
+            position: relative;
+            max-width: 100%;
         }
-        /* 隱藏滾動條但保持功能 */
-        .tag-scroll {
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none;  /* IE 10+ */
+
+        .search-input {
+            background-color: var(--bg-element);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50px;
+            padding: 12px 25px 12px 50px;
+            width: 100%;
+            transition: all 0.3s;
         }
-        .tag-scroll::-webkit-scrollbar {
-            display: none; /* Chrome/Safari/Webkit */
+
+        .search-input:focus {
+            background-color: #333;
+            border-color: #666;
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        /* --- Filter Buttons --- */
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-custom {
+            border: 1px solid #555;
+            background-color: transparent;
+            color: #ccc;
+            padding: 6px 16px;
+            border-radius: 50px;
+            margin: 0 5px 8px 0;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: inline-block;
+            user-select: none;
+        }
+
+        .btn-custom:hover {
+            border-color: #888;
+            color: white;
+        }
+
+        .btn-custom.active {
+            background-color: var(--accent-active);
+            color: var(--accent-text);
+            border-color: var(--accent-active);
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        /* --- Dept Trigger Area --- */
+        .dept-trigger-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
         }
         
-        /* 篩選器群組樣式 */
-        .filter-group-label {
-            font-size: 0.75rem;
-            color: #ccfbf1; /* teal-100 */
-            margin-bottom: 0.5rem;
-            font-weight: 500;
+        .dept-trigger-box:active {
+            background-color: var(--bg-element);
         }
+
+        .selected-tags-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .mini-tag {
+            font-size: 0.8rem;
+            background-color: #444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* --- Clinic Cards --- */
+        .clinic-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .clinic-card:active {
+            transform: scale(0.98);
+        }
+
+        .card-header-custom {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .clinic-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .badge-district {
+            background-color: #333;
+            color: #ddd;
+            border: 1px solid #555;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .info-row {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+
+        .info-row i {
+            color: #888;
+            width: 20px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .info-row a {
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px dotted #666;
+            padding-bottom: 1px;
+        }
+
+        .dept-tag {
+            background-color: var(--bg-element);
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        /* --- Custom Offcanvas (Slide In) Styles --- */
+        
+        /* 1. 基本設定：深色背景，左側邊框 */
+        .custom-offcanvas {
+            background-color: var(--bg-dark);
+            border-left: 1px solid var(--border-color);
+        }
+
+        /* 2. 寬度控制邏輯 */
+        /* 手機版預設：Bootstrap offcanvas 預設寬度約為 400px，我們強制改為 100% 以適應手機 */
+        .custom-offcanvas {
+            width: 100% !important; 
+        }
+
+        /* 電腦/平板版 (>= 768px)：限制寬度為 550px */
+        @media (min-width: 768px) {
+            .custom-offcanvas {
+                width: 550px !important;
+            }
+        }
+
+        /* 3. 遮罩樣式 (Backdrop) */
+        /* 加深遮罩顏色，讓深色背景下的層次感更明顯 */
+        .offcanvas-backdrop {
+            background-color: rgba(0, 0, 0, 0.8) !important;
+        }
+
+        /* 4. Offcanvas 內部佈局 */
+        .offcanvas-header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+        }
+
+        .offcanvas-body {
+            padding: 20px 20px 80px 20px; /* 底部留白給按鈕 */
+            overflow-y: auto;
+        }
+
+        /* 5. 底部懸浮按鈕區 (改為 sticky) */
+        .offcanvas-footer-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, var(--bg-dark) 80%, rgba(18,18,18,0));
+            z-index: 10;
+            text-align: center;
+        }
+
+        .sticky-btn {
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-weight: 700;
+        }
+
     </style>
 </head>
 <body>
-    <div id="root"></div>
+
+    <!-- 頂部搜尋欄 -->
+    <div class="hero-section">
+        <div class="container">
+            <h5 class="text-center mb-3 fw-bold text-white">新竹診所查詢</h5>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="搜尋名稱、地址、醫師...">
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- 行政區篩選 -->
+        <div class="filter-section">
+            <div class="section-title"><i class="fas fa-map-marker-alt me-1"></i> 行政區 (可多選)</div>
+            <div id="districtContainer" class="d-flex flex-wrap">
+                <!-- JS 生成按鈕 -->
+            </div>
+        </div>
+
+        <!-- 科別篩選 (Slide In Trigger) -->
+        <div class="filter-section">
+            <div class="section-title"><i class="fas fa-stethoscope me-1"></i> 科別篩選</div>
+            
+            <div class="dept-trigger-box" data-bs-toggle="offcanvas" data-bs-target="#deptOffcanvas">
+                <div class="flex-grow-1">
+                    <div class="fw-bold text-white mb-1">點擊選擇科別 (可多選)</div>
+                    <div id="selectedDeptDisplay" class="selected-tags-display">
+                        <span class="mini-tag">全部</span>
+                    </div>
+                </div>
+                <div class="text-end ps-3">
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果統計 -->
+        <div class="d-flex justify-content-between align-items-center mb-3 mt-4 px-1 border-bottom border-secondary pb-2">
+            <span class="text-muted small">搜尋結果</span>
+            <span class="badge bg-light text-dark rounded-pill" id="resultCount">0</span>
+        </div>
+
+        <!-- 診所列表 -->
+        <div id="clinicsList" class="row g-3">
+            <!-- JS 生成卡片 -->
+        </div>
+    </div>
+
+    <!-- Offcanvas (Slide In) -->
+    <!-- 注意：移除了 w-100，改用 custom-offcanvas 來控制 RWD 寬度 -->
+    <div class="offcanvas offcanvas-end custom-offcanvas" tabindex="-1" id="deptOffcanvas" aria-labelledby="deptOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white" id="deptOffcanvasLabel">選擇科別</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <!-- 使用 relative 定位容器，方便放置底部按鈕 -->
+        <div style="position: relative; height: 100%; display: flex; flex-direction: column;">
+            
+            <div class="offcanvas-body">
+                <div class="mb-3">
+                    <p class="text-muted small">請點擊下方按鈕進行篩選，再次點擊取消。若未選擇任何項目，預設顯示全部。</p>
+                </div>
+                <div id="deptContainer" class="d-flex flex-wrap gap-1">
+                    <!-- JS 生成科別 Checkbox -->
+                </div>
+            </div>
+
+            <!-- 底部確認按鈕區 -->
+            <div class="offcanvas-footer-area">
+                <button type="button" class="btn btn-light rounded-pill sticky-btn" data-bs-dismiss="offcanvas">
+                    確認篩選結果
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入資料檔 -->
+    <script src="clinic_data.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.clinicData === 'undefined') {
+                document.getElementById('clinicsList').innerHTML = `<div class="col-12 text-center py-5 text-muted">找不到資料檔案 clinic_data.js</div>`;
+                return;
+            }
+
+            const clinics = window.clinicData;
+
+            // 狀態管理
+            const state = {
+                text: '',
+                selectedDistricts: new Set(),
+                selectedDepts: new Set()
+            };
+
+            // DOM 元素
+            const districtContainer = document.getElementById('districtContainer');
+            const deptContainer = document.getElementById('deptContainer');
+            const searchInput = document.getElementById('searchInput');
+            const clinicsList = document.getElementById('clinicsList');
+            const resultCount = document.getElementById('resultCount');
+            const selectedDeptDisplay = document.getElementById('selectedDeptDisplay');
+
+            // 資料整理
+            const allDistricts = [...new Set(clinics.map(c => c.district))].sort();
+            const deptCounts = {};
+            clinics.flatMap(c => c.departments).forEach(d => {
+                deptCounts[d] = (deptCounts[d] || 0) + 1;
+            });
+            const allDepts = Object.keys(deptCounts).sort((a, b) => deptCounts[b] - deptCounts[a]);
+
+            // 渲染行政區按鈕
+            function renderDistrictButtons() {
+                const isAll = state.selectedDistricts.size === 0;
+                let html = `
+                    <div class="btn-custom ${isAll ? 'active' : ''}" onclick="toggleDistrict('all')">全部</div>
+                `;
+                allDistricts.forEach(d => {
+                    const isActive = state.selectedDistricts.has(d);
+                    html += `<div class="btn-custom ${isActive ? 'active' : ''}" onclick="toggleDistrict('${d}')">${d}</div>`;
+                });
+                districtContainer.innerHTML = html;
+            }
+
+            // 渲染科別按鈕
+            function renderDeptButtons() {
+                const isAll = state.selectedDepts.size === 0;
+                let html = `
+                    <div class="btn-custom ${isAll ? 'active' : ''}" style="width:100%; text-align:center; margin-bottom:15px;" onclick="toggleDept('all')">全部顯示</div>
+                `;
+                allDepts.forEach(d => {
+                    const isActive = state.selectedDepts.has(d);
+                    const count = deptCounts[d];
+                    html += `<div class="btn-custom ${isActive ? 'active' : ''}" onclick="toggleDept('${d}')">${d} <span style="font-size:0.7em; opacity:0.6;">(${count})</span></div>`;
+                });
+                deptContainer.innerHTML = html;
+                updateDeptDisplay();
+            }
+
+            // Toggle 邏輯
+            window.toggleDistrict = function(val) {
+                if (val === 'all') {
+                    state.selectedDistricts.clear();
+                } else {
+                    if (state.selectedDistricts.has(val)) {
+                        state.selectedDistricts.delete(val);
+                    } else {
+                        state.selectedDistricts.add(val);
+                    }
+                }
+                renderDistrictButtons();
+                renderClinics();
+            };
+
+            window.toggleDept = function(val) {
+                if (val === 'all') {
+                    state.selectedDepts.clear();
+                } else {
+                    if (state.selectedDepts.has(val)) {
+                        state.selectedDepts.delete(val);
+                    } else {
+                        state.selectedDepts.add(val);
+                    }
+                }
+                renderDeptButtons();
+                renderClinics();
+            };
+
+            // 更新選擇顯示
+            function updateDeptDisplay() {
+                if (state.selectedDepts.size === 0) {
+                    selectedDeptDisplay.innerHTML = `<span class="mini-tag">全部</span>`;
+                } else {
+                    const arr = Array.from(state.selectedDepts);
+                    const displayLimit = 5; 
+                    let html = arr.slice(0, displayLimit).map(d => `<span class="mini-tag">${d}</span>`).join('');
+                    if (arr.length > displayLimit) {
+                        html += `<span class="mini-tag">+${arr.length - displayLimit} 其他</span>`;
+                    }
+                    selectedDeptDisplay.innerHTML = html;
+                }
+            }
+
+            // 渲染列表
+            function renderClinics() {
+                const searchText = state.text.toLowerCase().trim();
+
+                const filtered = clinics.filter(clinic => {
+                    let matchDistrict = true;
+                    if (state.selectedDistricts.size > 0) {
+                        matchDistrict = state.selectedDistricts.has(clinic.district);
+                    }
+
+                    let matchDept = true;
+                    if (state.selectedDepts.size > 0) {
+                        matchDept = clinic.departments.some(d => state.selectedDepts.has(d));
+                    }
+
+                    let matchText = true;
+                    if (searchText) {
+                        matchText = clinic.name.toLowerCase().includes(searchText) ||
+                                    clinic.address.toLowerCase().includes(searchText) ||
+                                    clinic.contact.toLowerCase().includes(searchText) ||
+                                    clinic.phone.includes(searchText) ||
+                                    clinic.departments.some(d => d.toLowerCase().includes(searchText));
+                    }
+
+                    return matchDistrict && matchDept && matchText;
+                });
+
+                resultCount.innerText = filtered.length;
+
+                if (filtered.length === 0) {
+                    clinicsList.innerHTML = `
+                        <div class="col-12 text-center py-5 text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3" style="opacity:0.3"></i>
+                            <p>沒有符合條件的結果</p>
+                        </div>`;
+                    return;
+                }
+
+                const html = filtered.map(clinic => {
+                    const deptsHtml = clinic.departments.map(d => `<span class="dept-tag">${d}</span>`).join('');
+                    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clinic.address)}`;
+                    const phoneDisplay = clinic.phone ? clinic.phone : '<span class="text-muted fst-italic">無電話</span>';
+                    const phoneLink = clinic.phone ? `href="tel:${clinic.phone}"` : '';
+                    
+                    return `
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="clinic-card">
+                                <div class="card-header-custom">
+                                    <h3 class="clinic-name">${clinic.name}</h3>
+                                    <span class="badge-district">${clinic.district}</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-row">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <a href="${mapUrl}" target="_blank">${clinic.address}</a>
+                                    </div>
+                                    <div class="info-row">
+                                        <i class="fas fa-phone"></i>
+                                        <a ${phoneLink} class="fw-bold">${phoneDisplay}</a>
+                                    </div>
+                                    <div class="info-row">
+                                        <i class="fas fa-user-md"></i>
+                                        <span>${clinic.contact}</span>
+                                    </div>
+                                    <hr style="border-color:#444; margin:10px 0;">
+                                    <div>
+                                        ${deptsHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                clinicsList.innerHTML = html;
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                state.text = e.target.value;
+                renderClinics();
+            });
+
+            renderDistrictButtons();
+            renderDeptButtons();
+            renderClinics();
+        });
+    </script>
+    <!-- Bootstrap JS (必要) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
